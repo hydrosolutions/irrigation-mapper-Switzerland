@@ -346,3 +346,101 @@ def process_et_green_std(
         tasks.append(task)
 
     print(f"Generated {len(tasks)} export tasks for year {year}")
+
+
+def process_et_green_rainfed_buffered(
+    et_collection_list: ee.List,
+    landuse_collection: ee.FeatureCollection,
+    jurisdictions: ee.FeatureCollection,
+    double_cropping_image: ee.Image,
+    year: int,
+    aoi: ee.Geometry,
+    asset_path: str,
+    et_band_name: str = "downscaled",
+    time_step_type: str = "dekadal",
+    resolution: int = 10,
+    not_irrigated_crops: List[str] = None,
+    rainfed_crops: List[str] = None,
+    minimum_field_size: int = 1000,
+    buffer_distance: float = -30.0,
+    export_band_name: str = "ET_green",
+) -> None:
+    """
+    Process and export ET green images for rainfed fields with inward buffer applied.
+    
+    This function prepares rainfed fields, applies a 30-m inward buffer to the fields,
+    and exports ET values of the remaining rainfed fields using a for loop for client-side processing.
+
+    Args:
+        et_collection_list (ee.List): List of ET images
+        landuse_collection (ee.FeatureCollection): Collection of land use features
+        jurisdictions (ee.FeatureCollection): Collection of jurisdiction boundaries
+        double_cropping_image (ee.Image): Double cropping classification image
+        year (int): Year to process
+        aoi (ee.Geometry): Area of interest
+        asset_path (str): Base path for asset export
+        et_band_name (str): Name of the ET band to process
+        time_step_type (str): Type of time step ("dekadal" or "monthly")
+        resolution (int): Export resolution in meters
+        not_irrigated_crops (List[str]): List of crops to exclude
+        rainfed_crops (List[str]): List of rainfed reference crops
+        minimum_field_size (int): Minimum field size in m^2, defaults to 1000 (1 ha)
+        buffer_distance (float): Buffer distance in meters (negative for inward buffer), defaults to -30.0
+        export_band_name (str): Name for the exported band
+
+    Returns:
+        None
+    """
+    # Use default crop lists if none provided
+    if not_irrigated_crops is None:
+        not_irrigated_crops = get_crops_to_exclude()
+    if rainfed_crops is None:
+        rainfed_crops = get_rainfed_reference_crops()
+
+    # Prepare rainfed fields
+    rainfed_fields = prepare_rainfed_fields(
+        landuse_collection,
+        double_cropping_image,
+        not_irrigated_crops,
+        rainfed_crops,
+        minimum_field_size,
+    )
+    
+    # Apply 30-m inward buffer to rainfed fields
+    buffered_rainfed_fields = rainfed_fields.map(
+        lambda feature: feature.setGeometry(feature.geometry().buffer(buffer_distance))
+    )
+
+    tasks = []
+    collection_size = ee.List(et_collection_list).size().getInfo()
+
+    for i in range(collection_size):
+        # Process ET image
+        et_image = ee.Image(et_collection_list.get(i))
+        
+        # Get time step pattern from image date
+        date = ee.Date(et_image.get("system:time_start"))
+        time_step_pattern = get_time_step_pattern(date, time_step_type)
+
+        # Extract raw ET values from buffered rainfed fields (no computation needed)
+        # Create a mask from the buffered rainfed fields
+        fields_mask = buffered_rainfed_fields.reduceToImage(['area'], ee.Reducer.first()).mask()
+        
+        # Mask the ET image with the buffered rainfed fields to extract only those pixel values
+        et_values = et_image.select(et_band_name).updateMask(fields_mask)
+
+        # Convert to integer and rename band
+        et_values = back_to_int(et_values, 100).rename(export_band_name)
+        
+        # Create export task
+        task_name = f"{export_band_name}_buffered_{time_step_type}_{year}_{time_step_pattern}"
+        task = generate_export_task(
+            et_values, asset_path, task_name, year, aoi, resolution
+        )
+        tasks.append(task)
+
+    print(f"Generated {len(tasks)} export tasks for year {year} with {buffer_distance}m buffer applied to rainfed fields")
+
+    
+
+    
