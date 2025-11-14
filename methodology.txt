@@ -1,8 +1,7 @@
 
-Step 1: Landnutzung and definition/upload rainfed reference fields
+Step 1: Data preparation (e.g., evapotranspiration, landuse, rainfed reference fields)
 Step 2: Vegetation period extraction, attribution of vegetation period to Nutzungsflaechen
 Step 3: ET and ETF compositing
 Step 4: ETgreen and ETF modeling, calculation of ETgreen residuals
-Step 5: Median ETblue per field
-Step 6: Significance testing
-Step 7: Annual ETblue
+Step 5: Median ETblue per field, significance testing, annual ETblue
+Step 6: Visualization of results
