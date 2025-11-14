@@ -145,7 +145,7 @@ def _process_single_image(
     image_date = ee.Date(image.get("system:time_start"))
 
     # Check if image has any valid pixels
-    valid_pixels = image.select(et_band_name).unmask(None)
+    valid_pixels = image.select(et_band_name)#.unmask(None) #mistake corrected 23 sept 2025
     valid_count = (
         valid_pixels.multiply(0)
         .add(1)

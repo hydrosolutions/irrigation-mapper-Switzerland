@@ -162,6 +162,9 @@ def get_category1_crops() -> set:
         'Obstanlagen Äpfel',
         'Reben',
 
+        "Einjä. gärtn. Freilandkult.(Blumen,Rollrasen)",
+        "Einjährige Freilandgemüse o. Konservengemüse"
+
         # 'Einjährige Gewürz- und Medizinalpflanzen',#z.B Petersilie
     }
 
@@ -234,41 +237,6 @@ def add_double_cropping_info(
         )
 
         return feature.set("isDoubleCropped", median_value)
-
-    return feature_collection.map(add_double_crop_property)
-
-
-def add_ALL_double_cropping_info(
-    feature_collection: ee.FeatureCollection, double_cropping_image: ee.Image, scale=10
-) -> ee.FeatureCollection:
-    """
-    Adds double cropping information to each feature based on the median value of pixels within the feature.
-
-    Args:
-        feature_collection (ee.FeatureCollection): The input feature collection of crop fields.
-        double_cropping_image (ee.Image): Image with 'isDoubleCropping' band (1 for double-cropped, 0 for single-cropped).
-        scale (int): The scale to use for reducing the image.
-
-    Returns:
-        ee.FeatureCollection: Updated feature collection with 'isDoubleCropped' property.
-    """
-
-    filled_image = double_cropping_image.unmask(0)
-
-    def add_double_crop_property(feature):
-        median_value = (
-            filled_image
-            .reduceRegion(
-                reducer=ee.Reducer.median(),
-                geometry=feature.geometry(),
-                scale=scale,
-            )
-        )
-        # Create a new dictionary with rounded values
-        rounded_median_value = ee.Dictionary(
-            median_value.map(lambda key, value: ee.Number(value).round())
-        )
-        return feature.set(rounded_median_value)
 
     return feature_collection.map(add_double_crop_property)
 

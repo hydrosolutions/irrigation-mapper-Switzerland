@@ -471,7 +471,7 @@ def back_to_int(image: ee.Image, scale: int) -> ee.Image:
         The image converted to int and multiplied by the scale
     """
     date = image.get("system:time_start")
-    return image.multiply(scale).toInt().set("system:time_start", date)
+    return image.multiply(scale).round().set("system:time_start", date)
 
 
 def export_image_to_asset(
@@ -516,6 +516,25 @@ def export_image_to_asset(
     print(f"Exporting {task_name} for {year} to {asset_id}")
     task.start() 
     return task
+
+
+def export_feature_collection(
+    collection: ee.FeatureCollection, task_name: str, asset_id: str
+):
+    """
+    Export the feature collection to an Earth Engine asset.
+
+    Args:
+        collection: The feature collection to export
+        task_name: The name of the export task
+        asset_id: The asset ID to export to
+    """
+    task = ee.batch.Export.table.toAsset(
+        collection=collection,
+        description=task_name,
+        assetId=asset_id,
+    )
+    task.start()
 
 
 def print_value_ranges(
