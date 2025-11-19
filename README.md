@@ -1,4 +1,4 @@
-# Irrigation Mapper BAFU
+# Irrigation Mapper Switzerland
 
 A comprehensive irrigation mapping and water demand analysis framework for Switzerland, developed for the Swiss Federal Office for the Environment (BAFU). This project uses satellite-derived evapotranspiration data to identify irrigated agricultural fields and quantify irrigation water volumes at field and regional scales.
 
