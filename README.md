@@ -1,42 +1,88 @@
-# Irrigation Mapper BAFU
+# Remote Sensing-Based Irrigation Mapping for Swiss Agriculture
 
-A comprehensive irrigation mapping and water demand analysis framework for Switzerland, developed for the Swiss Federal Office for the Environment (BAFU). This project uses satellite-derived evapotranspiration data to identify irrigated agricultural fields and quantify irrigation water volumes at field and regional scales.
+A comprehensive irrigation mapping and agricultural water demand assessment framework developed for the Swiss Federal Office for the Environment (BAFU). This project combines satellite-based evapotranspiration data with land-use information to identify irrigated fields, quantify irrigation water consumption, and provide municipality- and canton-level irrigation statistics for Switzerland.
+
+This repository contains the operational workflow developed for the BAFU study *«Satellitenfernerkundung zur Erfassung bewässerter Flächen und Bewässerungsmengen in der Schweiz - Validierung und methodische Weiterentwicklung am Beispiel des Bibertals im Kanton Schaffhausen»* (hydrosolutions GmbH, 2025). The workflow corresponds to the methods documented in the BAFU report and will be updated as the operational methodology evolves.
+
+---
 
 ## Overview
 
-This project implements a robust methodology for mapping irrigation patterns using Google Earth Engine, combining multiple satellite data sources (Landsat, Sentinel-2) with agricultural land use data to:
+The irrigation mapping workflow relies on actual evapotranspiration (ETa) products (Landsat Collection-2 L3 Provisional Actual ET; WaPOR V3) and compares them against rainfed reference ET (ETgreen) to estimate irrigation-driven water consumption (ETblue).
 
-- **Identify irrigated fields** using evapotranspiration analysis
-- **Quantify irrigation volumes** at field and regional scales  
-- **Analyze temporal patterns** of irrigation across growing seasons
-- **Generate comprehensive reports** for agricultural water management
+This methodology is consistent with the scientific approach documented in the accompanying BAFU report, where ET-based irrigation estimates were validated and applied in the Bibertal (Kanton Schaffhausen) and across the cantons Zürich, Thurgau and Schaffhausen.
+
+Core objectives:
+
+* Identify irrigated agricultural fields using ET-based indicators
+* Estimate seasonal and annual irrigation volumes
+* Provide irrigation statistics per municipality, district, and canton
+* Enable reproducible, transparent, and scalable monitoring using Earth observation data
+* Support water resources management under increasing climatic pressure
+
+---
 
 ## Key Features
 
-- 🛰️ **Multi-sensor satellite data processing** (Landsat 8/9, Sentinel-2)
-- 🌾 **Crop-specific irrigation analysis** (vegetables, maize, grasslands, sugar beets)
-- 📊 **Field-level water demand quantification** 
-- 🗺️ **Interactive visualization tools** and maps
-- 📈 **Time-series analysis** (2018-2024) for trend assessment
-- 🎯 **High-resolution mapping** (10-30m spatial resolution)
+* Multi-sensor satellite integration (Landsat 7/8/9, Sentinel‑2)
+* Machine-learning ETgreen modeling (Random Forest) using high‑resolution auxiliary datasets
+* ETa–ETgreen comparison for ETblue estimation (irrigation water consumption)
+* Integrated ETa/ETc stress filtering and noise detection
+* Field‑level and municipality‑level irrigation statistics
+* Time series analysis (2018–2024) with trend identification
+* Fully reproducible workflow in Python + Google Earth Engine
 
 ## Methodology
 
-The project follows a systematic 6-step methodology:
+The methodology follows the validated and extended framework developed in the 2025 BAFU report *«Satellitenfernerkundung zur Erfassung bewässerter Flächen und Bewässerungsmengen in der Schweiz»*. It integrates satellite-based ET products with machine learning to model ETgreen across heterogeneous agricultural landscapes.
 
-1. **Data Preparation**: Processing evapotranspiration, land use, and rainfed reference field data
-2. **Vegetation Period Extraction**: Identifying growing seasons and crop phenology
-3. **ET Compositing**: Creating temporal composites of ET and ETf (ET fraction) data  
-4. **ETgreen Modeling**: Computing rainfed evapotranspiration and residuals
-5. **ETblue Calculation**: Quantifying irrigation water requirements per field
-6. **Results Visualization**: Generating maps, statistics, and analytical reports
+### 1. Data Preparation
 
-### Core Algorithms
+Preparation of ETa products (Landsat, WaPOR), land‑use polygons, and auxiliary datasets.
 
-- **ETblue = ETtotal - ETgreen**: Irrigation water = Total ET - Rainfed ET
-- **Threshold-based classification**: ETa/ETc ratios and ET magnitude thresholds
-- **Temporal filtering**: Growing season analysis (May-September)
-- **Statistical validation**: Significance testing and outlier detection
+### 2. Vegetation Period Identification
+
+NDVI-based extraction of crop-specific growing seasons using harmonised Sentinel‑2 time series.
+
+### 3. ET Compositing
+
+Creation of dekadal (10‑day) ETa composites for all available Landsat scenes.
+
+### 4. Machine-Learning–Based ETgreen Modeling
+
+A Random Forest model estimates **ETgreen** (rainfed evapotranspiration) using non‑irrigated reference surfaces (Weiden, Wiesen, Kunstwiesen) and high‑resolution auxiliary datasets:
+
+* Copernicus DEM (Höhe, Hangneigung, Exposition)
+* Bodenhinweiskarte (Sand/Schluff/Ton, SOC, CEC)
+* MeteoSwiss RhiresD dekadische Niederschlagssummen
+* NDVI-based phenology layers (Sentinel‑2)
+* Spatial predictors (X/Y coordinates)
+* Waldnähe (to reduce mixed‑pixel and TIR biases)
+
+The model predicts ETgreen at 30 m resolution for every dekade across the three cantons.
+
+### 5. ETblue Calculation
+
+ETblue = ETa – ETgreen on a per‑pixel and per‑field basis.
+
+Filtering steps:
+
+* ETa/ETc thresholding to remove water‑stressed periods
+* Residual-based noise detection
+* Monthly ETblue thresholds for classification of irrigated fields
+
+### 6. Visualization & Reporting
+
+Field‑level and municipality‑level aggregation, mapping, statistics, and interactive HTML map visualizations.
+
+## Core Algorithms
+
+* ETblue = ETa − ETgreen
+* Threshold-based irrigation detection (monthly ETblue minimum)
+* ETa/ETc stress indicator filtering
+* Temporal constraints (growing season: May–September)
+
+---
 
 ## Repository Structure
 
@@ -54,184 +100,97 @@ irrigation-mapper-bafu/
 │   ├── IV_ETgreen_ETF_Residuals/  # Step 4: ETgreen modeling
 │   ├── V_ETblue_per_field/        # Step 5: Field-level analysis
 │   └── VI_results_visualization/  # Step 6: Results and visualization
-├── utils/                         # Utility functions and helpers
-├── vegetation_period_NDVI/        # NDVI-based vegetation period tools
-├── data/                          # Processed data outputs
-│   └── processed/                 # Analysis results and statistics
-└── Figures/                       # Generated visualizations and maps
+└── utils/                         # Utility functions and helpers
 ```
 
-## Installation & Setup
-
-### Prerequisites
-
-- Python 3.8+ 
-- Google Earth Engine account and authentication
-- Required Python packages (see requirements below)
-
-### Dependencies
-
-```bash
-# Core packages
-pip install earthengine-api
-pip install geemap
-pip install pandas numpy matplotlib
-pip install jupyter ipywidgets
-
-# Earth Engine authentication
-earthengine authenticate
-```
-
-### Google Earth Engine Setup
-
-1. Create a Google Earth Engine account at [earthengine.google.com](https://earthengine.google.com)
-2. Authenticate your environment:
-   ```bash
-   earthengine authenticate
-   ```
-3. Initialize in Python:
-   ```python
-   import ee
-   ee.Initialize(project="your-project-name")
-   ```
-
-## Usage
-
-### Quick Start
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/hydrosolutions/irrigation-mapper-bafu.git
-   cd irrigation-mapper-bafu
-   ```
-
-2. **Run the complete workflow**:
-   Navigate through the numbered notebook folders in sequence:
-   ```
-   notebooks/I_data_preparation/     → Data preprocessing
-   notebooks/II_Vegetation_periods_extraction/  → Phenology extraction  
-   notebooks/III_decadal_compositing/     → Temporal compositing
-   notebooks/IV_ETgreen_ETF_Residuals/    → ETgreen modeling
-   notebooks/V_ETblue_per_field/          → Field-level irrigation analysis
-   notebooks/VI_results_visualization/    → Results visualization
-   ```
-
-3. **Field-level processing example**:
-   ```python
-   from src.et_blue_per_field.field_level_postprocessing import FieldLevelETProcessor
-   
-   # Initialize processor
-   processor = FieldLevelETProcessor(config)
-   
-   # Process specific date and canton
-   et_blue_image = processor.process_date("2023-07-15", ["Thurgau"])
-   ```
-
-### Configuration
-
-Key parameters can be adjusted in the processing scripts:
-
-```python
-# Irrigation detection thresholds
-ETa_ETc_threshold = 0.7      # Water stress threshold
-ETblue_threshold = 3.0       # Minimum irrigation amount (mm)
-
-# Spatial parameters  
-resolution = 10              # Output resolution (meters)
-minimum_field_size = 1000    # Minimum field size (m²)
-
-# Temporal parameters
-growing_season = [5, 9]      # May to September
-```
+---
 
 ## Data Sources
 
-- **Satellite Imagery**: Landsat 8/9, Sentinel-2 (via Google Earth Engine)
-- **Land Use Data**: Swiss Federal Statistical Office agricultural surveys
-- **Meteorological Data**: Swiss meteorological stations
-- **Administrative Boundaries**: Swiss cantons and municipalities
+### Satellite Data
+
+* **Landsat Collection‑2 L3 Provisional Actual ET** (USGS, SSEBop-based)
+* **WaPOR V3.01** (ETLook-based, FAO)
+* **Sentinel‑2 L2A** for NDVI time series
+
+### Auxiliary Datasets (used in machine-learning ETgreen modeling)
+
+* **Copernicus DEM GLO‑30** (height, slope, aspect)
+* **Bodenhinweiskarte** (soil texture, SOC, CEC)
+* **MeteoSwiss RhiresD** (daily precipitation, aggregated to dekades)
+* **NDVI phenology layers** to capture crop timing
+* **Bodenbedeckung Swisstopo** (forest)
+* **Spatial predictors (X/Y coordinates)**
+* **Swiss geodata** for land‑use polygons and boundaries
 
 ## Key Outputs
 
 ### Data Products
-- **Irrigation Maps**: Field-level irrigation occurrence and intensity
-- **Water Volume Statistics**: Monthly/seasonal irrigation volumes by region
-- **Crop Analysis**: Irrigation patterns by crop type
-- **Trend Analysis**: Multi-year irrigation trends (2018-2024)
 
-### File Formats
-- **Raster**: GeoTIFF (10-30m resolution)
-- **Vector**: Shapefiles, GeoJSON
-- **Tables**: CSV, Excel
-- **Interactive**: HTML maps via geemap
+* Field-level irrigation maps (10–30 m)
+* Municipality/district/canton-level irrigation statistics
+* Annual and multi-year irrigation trends (2018–2024)
+* Crop-group-specific irrigation water consumption
 
-## Results & Applications
+### Formats
 
-### Key Findings
-- Comprehensive irrigation mapping across Swiss agricultural regions
-- Crop-specific irrigation water demand quantification
-- Temporal analysis of irrigation patterns and trends
-- Regional water use statistics for agricultural planning
-
-### Use Cases
-- **Water Resource Management**: Planning and allocation of irrigation water
-- **Policy Development**: Evidence-based agricultural water policy
-- **Climate Adaptation**: Understanding irrigation needs under climate change
-- **Agricultural Planning**: Crop selection and irrigation system design
-
-## Contributing
-
-We welcome contributions to improve the irrigation mapping framework:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit changes (`git commit -am 'Add new feature'`)
-4. Push to branch (`git push origin feature/your-feature`)
-5. Create a Pull Request
-
-### Development Guidelines
-- Follow PEP 8 Python style guidelines
-- Include docstrings for all functions
-- Add unit tests for new functionality
-- Update documentation for significant changes
-
-## Citation
-
-If you use this work in your research, please cite:
-
-```bibtex
-@misc{irrigation-mapper-bafu,
-  title={Irrigation Mapping Framework for Swiss Agriculture},
-  author={Hydrosolutions and BAFU},
-  year={2025},
-  url={https://github.com/hydrosolutions/irrigation-mapper-bafu}
-}
-```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Swiss Federal Office for the Environment (BAFU) for funding and support
-- Google Earth Engine team for satellite data infrastructure
-- Swiss Federal Statistical Office for agricultural land use data
-- Contributors and collaborators in the Swiss water resources community
-
-## Contact
-
-- **Project Lead**: [Contact Information]
-- **Technical Support**: [Email/Issues]
-- **Organization**: Hydrosolutions
-- **Website**: [Project Website]
-
-## Version History
-
-- **v1.0.0** (2025): Initial release with complete irrigation mapping workflow
-- **v0.9.0** (2024): Beta version with field-level processing
-- **v0.1.0** (2023): Initial development and proof of concept
+* GeoTIFF (rasters, ET products)
+* Shapefiles / GeoJSON (field geometries)
+* CSV / Excel (statistics)
 
 ---
 
-*This project contributes to sustainable water resource management in Swiss agriculture through advanced satellite-based irrigation monitoring.*
+## Results & Applications
+
+The methodology has been successfully applied in the BAFU study *«Satellitenfernerkundung zur Erfassung bewässerter Flächen und Bewässerungsmengen in der Schweiz»*, covering:
+
+* The Bibertal (Kanton Schaffhausen) as the main validation and method‑development region
+* Full‑extent application to the cantons Zürich, Thurgau and Schaffhausen (2018–2024)
+
+These applications demonstrate the scalability and robustness of the machine‑learning–based ETgreen approach in Swiss agricultural landscapes.
+
+### Use Cases
+
+* Water resource allocation & planning
+* Cantonal reporting and monitoring
+* Climate adaptation strategies
+* Agricultural extension services
+
+---
+
+## Citation
+
+```
+hydrosolutions GmbH (2025):
+Satellitenfernerkundung zur Erfassung bewässerter Flächen und Bewässerungsmengen in der Schweiz -
+Validierung und methodische Weiterentwicklung am Beispiel des Bibertals im Kanton Schaffhausen
+Bericht zuhanden des Bundesamts für Umwelt (BAFU).
+```
+
+hydrosolutions GmbH (2025):
+Abschätzung der bewässerten Fläche im Kanton Thurgau pro Gemeinde mit Fernerkundungsdaten.
+Bericht zuhanden des Bundesamts für Umwelt (BAFU).
+
+or
+
+```
+@misc{irrigation-mapper-bafu,
+title={Remote Sensing-Based Irrigation Mapping for Swiss Agriculture},
+author={Hydrosolutions GmbH},
+year={2025},
+url={https://github.com/hydrosolutions/irrigation-mapper-Switzerland}
+}
+```
+
+---
+
+## Contact
+
+**Dr. Silvan Ragettli**\
+Project Lead\
+hydrosolutions GmbH\
+Venusstrasse 29, 8050 Zürich\
+Email: [ragettli@hydrosolutions.ch](mailto\:ragettli@hydrosolutions.ch)\
+Phone: +41 43 535 05 80
+
+```
