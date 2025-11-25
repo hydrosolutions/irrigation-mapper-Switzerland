@@ -1,4 +1,6 @@
 # Remote Sensing-Based Irrigation Mapping for Swiss Agriculture
+=======
+# Irrigation Mapper Switzerland
 
 A comprehensive irrigation mapping and agricultural water demand assessment framework developed for the Swiss Federal Office for the Environment (BAFU). This project combines satellite-based evapotranspiration data with land-use information to identify irrigated fields, quantify irrigation water consumption, and provide municipality- and canton-level irrigation statistics for Switzerland.
 
@@ -193,4 +195,4 @@ Venusstrasse 29, 8050 Zürich\
 Email: [ragettli@hydrosolutions.ch](mailto\:ragettli@hydrosolutions.ch)\
 Phone: +41 43 535 05 80
 
-```
+*This project contributes to sustainable water resource management in Swiss agriculture through advanced satellite-based irrigation monitoring.*
