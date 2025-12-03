@@ -2,9 +2,9 @@
 =======
 # Irrigation Mapper Switzerland
 
-A comprehensive irrigation mapping and agricultural water demand assessment framework developed for the Swiss Federal Office for the Environment (BAFU). This project combines satellite-based evapotranspiration data with land-use information to identify irrigated fields, quantify irrigation water consumption, and provide municipality- and canton-level irrigation statistics for Switzerland.
+A comprehensive irrigation mapping and agricultural water demand assessment framework developed for the Swiss Federal Office for the Environment (FOEN). This project combines satellite-based evapotranspiration data with land-use information to identify irrigated fields, quantify irrigation water consumption, and provide municipality- and canton-level irrigation statistics for Switzerland.
 
-This repository contains the operational workflow developed for the BAFU study *«Satellitenfernerkundung zur Erfassung bewässerter Flächen und Bewässerungsmengen in der Schweiz - Validierung und methodische Weiterentwicklung am Beispiel des Bibertals im Kanton Schaffhausen»* (hydrosolutions GmbH, 2025). The workflow corresponds to the methods documented in the BAFU report and will be updated as the operational methodology evolves.
+This repository contains the operational workflow developed for the FOEN study *«Satellitenfernerkundung zur Erfassung bewässerter Flächen und Bewässerungsmengen in der Schweiz - Validierung und methodische Weiterentwicklung am Beispiel des Bibertals im Kanton Schaffhausen»* (hydrosolutions GmbH, 2025). The workflow corresponds to the methods documented in the FOEN report and will be updated as the operational methodology evolves.
 
 ---
 
@@ -163,15 +163,11 @@ These applications demonstrate the scalability and robustness of the machine‑l
 ## Citation
 
 ```
-hydrosolutions GmbH (2025):
-Satellitenfernerkundung zur Erfassung bewässerter Flächen und Bewässerungsmengen in der Schweiz -
-Validierung und methodische Weiterentwicklung am Beispiel des Bibertals im Kanton Schaffhausen
-Bericht zuhanden des Bundesamts für Umwelt (BAFU).
+Ragettli S., Marti B., Siegfried T. (2025). Satellitenfernerkundung zur
+Erfassung bewässerter Flächen und Bewässerungsmengen in der Schweiz – Validierung
+und methodische Weiterentwicklung am Beispiel des Bibertals im Kanton
+Schaffhausen. hydrosolutions GmbH, Zürich. https://doi.org/10.5281/zenodo.17788920
 ```
-
-hydrosolutions GmbH (2025):
-Abschätzung der bewässerten Fläche im Kanton Thurgau pro Gemeinde mit Fernerkundungsdaten.
-Bericht zuhanden des Bundesamts für Umwelt (BAFU).
 
 or
 
