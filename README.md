@@ -1,6 +1,4 @@
 # Remote Sensing-Based Irrigation Mapping for Swiss Agriculture
-=======
-# Irrigation Mapper Switzerland
 
 A comprehensive irrigation mapping and agricultural water demand assessment framework developed for the Swiss Federal Office for the Environment (FOEN). This project combines satellite-based evapotranspiration data with land-use information to identify irrigated fields, quantify irrigation water consumption, and provide municipality- and canton-level irrigation statistics for Switzerland.
 
